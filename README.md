@@ -20,36 +20,38 @@ npm install
 
 ### 2. Environment Setup
 
-Copy `.env.example` to `.env` and set your API key:
+Copy `.env.example` to `.env.local` and set your API key:
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Edit `.env`:
+Edit `.env.local`:
 ```env
-# For Gemini (default)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# For OpenAI (if switching)
+# For OpenAI (default)
 OPENAI_API_KEY=your_openai_api_key_here
+
+# For Gemini (if switching)
+GEMINI_API_KEY=your_gemini_api_key_here
 
 PORT=8080
 ```
 
+> `.env.local` holds your real keys and is git-ignored. Do not commit it.
+
 ### 3. Configure LLM Provider
 
-Edit `server.js` lines 13-14:
+Edit the `PROVIDER` constant near the top of `server.js`:
 
 ```javascript
-// For Gemini (default)
-const PROVIDER = 'gemini';
-const MODEL = 'gemini-2.5-flash';
+// For OpenAI (default) -> gpt-5.5
+const PROVIDER = 'openai';
 
-// For OpenAI
-// const PROVIDER = 'openai';
-// const MODEL = 'gpt-4o-mini';
+// For Gemini -> gemini-3.5-flash
+// const PROVIDER = 'gemini';
 ```
+
+The model is selected automatically from the `MODELS` map based on `PROVIDER`.
 
 ### 4. Start Server
 
@@ -200,15 +202,14 @@ No server code changes required!
 
 ## LLM Provider Configuration
 
-### Switch to OpenAI
+### Switch to OpenAI (default)
 
 1. Edit `server.js`:
 ```javascript
 const PROVIDER = 'openai';
-const MODEL = 'gpt-4o-mini';
 ```
 
-2. Set OpenAI API key in `.env`:
+2. Set OpenAI API key in `.env.local`:
 ```env
 OPENAI_API_KEY=your_key_here
 ```
@@ -218,10 +219,9 @@ OPENAI_API_KEY=your_key_here
 1. Edit `server.js`:
 ```javascript
 const PROVIDER = 'gemini';
-const MODEL = 'gemini-2.5-flash';
 ```
 
-2. Set Gemini API key in `.env`:
+2. Set Gemini API key in `.env.local`:
 ```env
 GEMINI_API_KEY=your_key_here
 ```
@@ -236,12 +236,10 @@ npm run dev
 ### Supported Models
 
 **OpenAI:**
-- `gpt-4o-mini`
-- `gpt-5-mini`
+- `gpt-5.5` (default)
 
 **Gemini:**
-- `gemini-2.5-flash`
-- `gemini-2.5-flash-lite`
+- `gemini-3.5-flash`
 
 ## License
 

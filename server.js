@@ -1,7 +1,7 @@
 const express = require('express');
-const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
+// API Key などの環境変数は .env.local から読み込む
+require('dotenv').config({ path: '.env.local' });
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -9,9 +9,16 @@ const PORT = process.env.PORT || 8080;
 app.use(express.json());
 app.use(express.static('public'));
 
-// 設定をコードで定義
-const PROVIDER = 'openai';  // 'openai' or 'gemini'
-const MODEL = 'gpt-4o-mini';  // OpenAI: 'gpt-4o-mini', Gemini: 'gemini-2.5-flash'
+// ===== 設定 =====
+// 利用するLLMプロバイダを選択します（'openai' または 'gemini'）
+const PROVIDER = 'openai';
+
+// プロバイダごとに利用するモデル
+const MODELS = {
+    openai: 'gpt-5.5',        // OpenAI（デフォルト）
+    gemini: 'gemini-3.5-flash', // Google Gemini
+};
+const MODEL = MODELS[PROVIDER];
 
 let promptTemplate;
 try {
@@ -24,18 +31,34 @@ try {
 const OPENAI_API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
+// public/ 内の .html 一覧を返す（index.html がこの一覧を使ってリンクを表示する）
+app.get('/api/pages', (req, res) => {
+    const files = fs.readdirSync('public')
+        .filter(name => name.endsWith('.html') && name !== 'index.html');
+    res.json(files);
+});
+
+// 問題数の上限（過剰なリクエストでトークンを浪費しないようにする）
+const MAX_COUNT = 20;
+
 app.post('/api/', async (req, res) => {
     try {
-        const { prompt, title = 'Generated Content', ...variables } = req.body;
+        // title と、変数置換に使うその他のキーを受け取る
+        // （prompt.md がプロンプトを定義するので、リクエストでの上書きは許可しない）
+        const { title = 'Generated Content', ...variables } = req.body;
 
-        // prompt.mdのテンプレート変数を自動置換
-        let finalPrompt = prompt || promptTemplate;
-        
-        // リクエストボディの全てのキーを変数として利用
-        for (const [key, value] of Object.entries(variables)) {
-            const regex = new RegExp(`\\$\\{${key}\\}`, 'g');
-            finalPrompt = finalPrompt.replace(regex, value);
+        // count が指定されている場合は 1〜MAX_COUNT の範囲に収める
+        if (variables.count !== undefined) {
+            const count = Number(variables.count);
+            if (!Number.isInteger(count) || count < 1 || count > MAX_COUNT) {
+                return res.status(400).json({
+                    error: `count must be an integer between 1 and ${MAX_COUNT}`,
+                });
+            }
         }
+
+        // prompt.md のテンプレート変数 ${key} をリクエストの値で置換する
+        const finalPrompt = fillTemplate(promptTemplate, variables);
 
         let result;
         if (PROVIDER === 'openai') {
@@ -46,16 +69,26 @@ app.post('/api/', async (req, res) => {
             return res.status(400).json({ error: 'Invalid provider configuration' });
         }
 
-        res.json({ 
+        res.json({
             title: title,
-            data: result 
+            data: result,
         });
 
     } catch (error) {
+        // 詳細はサーバーログにのみ出力し、クライアントには汎用メッセージを返す
         console.error('API Error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to generate content. Please try again.' });
     }
 });
+
+// prompt.md 内の ${key} を variables の値で安全に置換する
+function fillTemplate(template, variables) {
+    return template.replace(/\$\{(\w+)\}/g, (match, key) => {
+        return Object.prototype.hasOwnProperty.call(variables, key)
+            ? String(variables[key])
+            : match; // 対応する値がなければそのまま残す
+    });
+}
 
 async function callOpenAI(prompt) {
     const apiKey = process.env.OPENAI_API_KEY;
@@ -86,18 +119,7 @@ async function callOpenAI(prompt) {
 
     const data = await response.json();
     const responseText = data.choices[0].message.content;
-    
-    try {
-        const parsedData = JSON.parse(responseText);
-        // Find the first value in the object that is an array
-        const arrayData = Object.values(parsedData).find(Array.isArray);
-        if (!arrayData) {
-            throw new Error('No array found in the LLM response object.');
-        }
-        return arrayData;
-    } catch (parseError) {
-        throw new Error('Failed to parse LLM response: ' + parseError.message);
-    }
+    return extractArray(responseText);
 }
 
 async function callGemini(prompt) {
@@ -129,18 +151,23 @@ async function callGemini(prompt) {
 
     const data = await response.json();
     const responseText = data.candidates[0].content.parts[0].text;
-    
+    return extractArray(responseText);
+}
+
+// LLM が返した JSON 文字列をパースし、最初に見つかった配列を取り出す
+function extractArray(responseText) {
+    let parsedData;
     try {
-        const parsedData = JSON.parse(responseText);
-        // Find the first value in the object that is an array
-        const arrayData = Object.values(parsedData).find(Array.isArray);
-        if (!arrayData) {
-            throw new Error('No array found in the LLM response object.');
-        }
-        return arrayData;
+        parsedData = JSON.parse(responseText);
     } catch (parseError) {
         throw new Error('Failed to parse LLM response: ' + parseError.message);
     }
+
+    const arrayData = Object.values(parsedData).find(Array.isArray);
+    if (!arrayData) {
+        throw new Error('No array found in the LLM response object.');
+    }
+    return arrayData;
 }
 
 app.listen(PORT, () => {
