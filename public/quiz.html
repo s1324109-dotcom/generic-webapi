@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Quiz Generator</title>
+    <title>普通免許 本免対策クイズ</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="quiz.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>ITパスポート対策クイズ</h1>
+            <div class="header-badge" aria-hidden="true"></div>
+            <h1>普通免許 本免対策クイズ</h1>
         </div>
 
         <div class="quiz-container">
             <!-- クイズ設定画面 -->
             <div class="quiz-setup" id="quizSetup">
-                <div class="form-group">
-                    <label for="quizTitle">クイズのタイトル:</label>
-                    <input type="text" id="quizTitle" placeholder="例: ITパスポート対策クイズ" value="ITパスポート対策クイズ">
+                <div class="setup-intro">
+                    <span class="setup-sign">本免対策</span>
+                    <p>場面判断多めのランダム問題で練習できます。</p>
                 </div>
                 
                 <div class="form-row">
@@ -28,7 +29,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <button class="btn" onclick="generateQuiz()">クイズを生成</button>
+                        <button class="btn" onclick="generateQuiz()">テストをはじめる</button>
                     </div>
                 </div>
             </div>
@@ -50,14 +51,18 @@
 
             <!-- 結果画面 -->
             <div class="quiz-results" id="quizResults">
-                <h2>クイズ結果</h2>
-                <div class="score" id="finalScore"></div>
+                <div class="result-card">
+                    <div class="result-icon" aria-hidden="true"></div>
+                    <h2>クイズ結果</h2>
+                    <div class="score" id="finalScore"></div>
+                    <p class="result-message" id="resultMessage"></p>
+                </div>
                 <button class="btn" onclick="restartQuiz()">新しいクイズを作成</button>
             </div>
         </div>
 
         <div class="status" id="status">Ready</div>
-        <div class="loading" id="loading">クイズを生成中...</div>
+        <div class="loading" id="loading">問題を準備中...</div>
     </div>
 
     <script>
@@ -75,17 +80,17 @@
         // ステータス更新
         function updateStatus() {
             const statusEl = document.getElementById('status');
-            statusEl.textContent = 'Ready to generate ITパスポート quiz';
-            statusEl.style.color = '#28a745';
+            statusEl.textContent = 'Ready to generate 本免対策 quiz';
+            statusEl.style.color = '#2f5f57';
         }
 
         // クイズ生成
         async function generateQuiz() {
-            const title = document.getElementById('quizTitle').value.trim();
+            const title = '普通免許 本免対策クイズ';
             const count = parseInt(document.getElementById('questionCount').value);
 
-            if (!title || count < 1) {
-                alert('すべての項目を正しく入力してください');
+            if (count < 1) {
+                alert('問題数を正しく入力してください');
                 return;
             }
 
@@ -197,10 +202,14 @@
             feedback.style.display = 'block';
             if (isCorrect) {
                 feedback.className = 'answer-feedback correct';
-                feedback.textContent = '正解！';
+                feedback.textContent = question.explanation
+                    ? `正解！ ${question.explanation}`
+                    : '正解！';
             } else {
                 feedback.className = 'answer-feedback incorrect';
-                feedback.textContent = `不正解。正解は「${question.selections[correctAnswer]}」です。`;
+                feedback.textContent = question.explanation
+                    ? `不正解。正解は「${question.selections[correctAnswer]}」です。${question.explanation}`
+                    : `不正解。正解は「${question.selections[correctAnswer]}」です。`;
             }
 
             if (currentQuestionIndex < quizData.length - 1) {
@@ -224,6 +233,20 @@
             const percentage = Math.round((score / quizData.length) * 100);
             document.getElementById('finalScore').textContent = 
                 `${score} / ${quizData.length} 問正解 (${percentage}%)`;
+            document.getElementById('resultMessage').textContent = getResultMessage(percentage);
+        }
+
+        function getResultMessage(percentage) {
+            if (percentage >= 90) {
+                return 'いい調子ですね！これならきっと受かります！';
+            }
+            if (percentage >= 70) {
+                return 'かなり仕上がっています！あと少し見直せばもっと安心です。';
+            }
+            if (percentage >= 50) {
+                return '大事なところはつかめています。間違えた問題を復習して合格ラインに近づきましょう！';
+            }
+            return 'ここから伸びます！標識・優先関係・危険予測をもう一度チェックしましょう。';
         }
 
         // クイズリスタート

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相性の良い男性タイプ診断</title>
+    <link rel="stylesheet" href="match.css">
+</head>
+<body>
+    <main class="match-app">
+        <section class="hero">
+            <div class="heart-mark" aria-hidden="true">
+                <svg viewBox="0 0 64 58" role="img" focusable="false">
+                    <path d="M32 54C23 45 8 35 6 21C4 10 11 4 20 4C26 4 30 7 32 11C34 7 38 4 44 4C53 4 60 10 58 21C56 35 41 45 32 54Z"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="eyebrow">Love Type Check</p>
+                <h1>あなたに似合う男性タイプ診断</h1>
+                <p class="lead">今の気分に近い項目を選ぶと、相性の良さそうな男性タイプを表示します。</p>
+            </div>
+        </section>
+
+        <section class="panel" id="questionPanel">
+            <div class="panel-head">
+                <h2>当てはまるものを選んでください</h2>
+                <span id="selectedCount">0個選択中</span>
+            </div>
+
+            <div class="choice-grid">
+                <label class="choice-card">
+                    <input type="checkbox" data-type="calm">
+                    <span>一緒にいると落ち着く人が好き</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="steady">
+                    <span>約束や時間を大事にする人に安心する</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="active">
+                    <span>休日は外に出て楽しく過ごしたい</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="smart">
+                    <span>会話のテンポや知的な話に惹かれる</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="sweet">
+                    <span>さりげない優しさや気遣いに弱い</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="calm">
+                    <span>感情的にならず話し合える関係がいい</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="active">
+                    <span>新しいお店や場所を一緒に開拓したい</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="steady">
+                    <span>将来のことをちゃんと考えてくれる人がいい</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="sweet">
+                    <span>褒め言葉や愛情表現はきちんと欲しい</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="smart">
+                    <span>自分の考えを尊重してくれる人に惹かれる</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="mature">
+                    <span>落ち着いた大人の余裕にドキッとする</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="creative">
+                    <span>独自の世界観やセンスがある人が好き</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="protective">
+                    <span>困った時にさっと守ってくれる人に弱い</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="humor">
+                    <span>たくさん笑わせてくれる人と一緒にいたい</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="mature">
+                    <span>静かなバーや夜景デートみたいな雰囲気が好き</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="creative">
+                    <span>音楽・映画・アートの話で盛り上がりたい</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="protective">
+                    <span>リードされるより、安心して頼れる関係がいい</span>
+                </label>
+                <label class="choice-card">
+                    <input type="checkbox" data-type="humor">
+                    <span>くだらないことで笑い合える関係に憧れる</span>
+                </label>
+            </div>
+
+            <button class="primary-btn" type="button" onclick="showMatchResult()">診断する</button>
+        </section>
+
+        <section class="result-panel" id="resultPanel" aria-live="polite">
+            <div class="result-badge" id="resultBadge">Best Match</div>
+            <h2 id="resultTitle"></h2>
+            <p id="resultDescription"></p>
+            <div class="result-note" id="resultNote"></div>
+            <button class="secondary-btn" type="button" onclick="resetMatch()">もう一度選ぶ</button>
+        </section>
+    </main>
+
+    <script>
+        const resultTypes = {
+            calm: {
+                title: '穏やかに包んでくれる聞き上手タイプ',
+                badge: 'Peaceful Match',
+                theme: 'calm',
+                description: 'あなたには、焦らせずに話を聞いてくれる落ち着いた男性が似合いそうです。無理に盛り上げるより、安心できる空気を作ってくれる人と相性が良いタイプです。',
+                note: '一緒にいて呼吸が合うか、沈黙が気まずくないかを大事にしてみて。'
+            },
+            steady: {
+                title: '誠実で頼れる安定感タイプ',
+                badge: 'Reliable Match',
+                theme: 'steady',
+                description: 'あなたには、言葉だけでなく行動で信頼を積み重ねてくれる男性が似合いそうです。予定や約束を大事にしてくれる人なら、自然体で長く付き合えます。',
+                note: '派手さよりも、日々の小さな誠実さを見て選ぶのが合いそうです。'
+            },
+            active: {
+                title: '一緒に世界を広げてくれる行動派タイプ',
+                badge: 'Adventure Match',
+                theme: 'active',
+                description: 'あなたには、楽しい予定を作るのが上手で、前向きに引っ張ってくれる男性が似合いそうです。いつもの日常も少し特別にしてくれる相手と相性が良いです。',
+                note: 'テンションだけでなく、疲れた時に歩幅を合わせてくれるかもチェックしてみて。'
+            },
+            smart: {
+                title: '会話で惹かれる知的パートナータイプ',
+                badge: 'Mind Match',
+                theme: 'smart',
+                description: 'あなたには、考え方を面白がってくれて、対等に話せる男性が似合いそうです。刺激のある会話と尊重し合える距離感が、関係を心地よくしてくれます。',
+                note: '正しさを押しつけず、あなたの意見も楽しんでくれる人が相性良し。'
+            },
+            sweet: {
+                title: '愛情表現がまっすぐな甘やかし上手タイプ',
+                badge: 'Sweet Match',
+                theme: 'sweet',
+                description: 'あなたには、好きな気持ちをきちんと伝えてくれる男性が似合いそうです。小さな変化に気づいてくれる人なら、安心して可愛くいられます。',
+                note: '優しさが一方通行にならず、お互いに大事にし合えるかを見てみて。'
+            },
+            mature: {
+                title: '余裕のある大人クールタイプ',
+                badge: 'Cool Match',
+                theme: 'mature',
+                description: 'あなたには、感情に流されすぎず、落ち着いた距離感で向き合ってくれる男性が似合いそうです。言葉数は多くなくても、ふとした行動で大切にしてくれる人と相性が良いです。',
+                note: '大人っぽさの中に、あなたへの優しさがちゃんと見えるかを大事にしてみて。'
+            },
+            creative: {
+                title: '感性を刺激してくれるクリエイティブタイプ',
+                badge: 'Creative Match',
+                theme: 'creative',
+                description: 'あなたには、好きなものや世界観を一緒に楽しんでくれる男性が似合いそうです。普通のデートより、映画・音楽・展示など感性が動く時間で距離が縮まりやすいタイプです。',
+                note: '個性的でも、あなたのペースや好みを尊重してくれる人なら長続きしそう。'
+            },
+            protective: {
+                title: '頼もしさで安心させてくれる守ってくれるタイプ',
+                badge: 'Protective Match',
+                theme: 'protective',
+                description: 'あなたには、困った時にすぐ気づいて行動してくれる男性が似合いそうです。強引さではなく、安心感のあるリードをしてくれる人と自然に信頼を深められます。',
+                note: '頼れるだけでなく、あなたの意思も聞いてくれるかを見てみて。'
+            },
+            humor: {
+                title: '毎日を明るくしてくれるユーモアタイプ',
+                badge: 'Happy Match',
+                theme: 'humor',
+                description: 'あなたには、気取らず笑わせてくれて、一緒にいるだけで気持ちが軽くなる男性が似合いそうです。何でもない日を楽しくできる相手と相性が良いです。',
+                note: '楽しいだけでなく、真面目な話もちゃんとできる人ならかなり良い組み合わせです。'
+            }
+        };
+
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const selectedCount = document.getElementById('selectedCount');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedCount);
+        });
+
+        function updateSelectedCount() {
+            const count = getSelectedItems().length;
+            selectedCount.textContent = `${count}個選択中`;
+            checkboxes.forEach(checkbox => {
+                checkbox.closest('.choice-card').classList.toggle('selected', checkbox.checked);
+            });
+        }
+
+        function getSelectedItems() {
+            return Array.from(checkboxes).filter(checkbox => checkbox.checked);
+        }
+
+        function showMatchResult() {
+            const selected = getSelectedItems();
+            if (selected.length < 3) {
+                alert('3個以上選ぶと診断できます。');
+                return;
+            }
+
+            const scores = {
+                calm: 0,
+                steady: 0,
+                active: 0,
+                smart: 0,
+                sweet: 0,
+                mature: 0,
+                creative: 0,
+                protective: 0,
+                humor: 0
+            };
+
+            selected.forEach(item => {
+                scores[item.dataset.type]++;
+            });
+
+            const bestType = Object.keys(scores).reduce((best, type) => {
+                return scores[type] > scores[best] ? type : best;
+            }, 'calm');
+            const result = resultTypes[bestType];
+            const resultPanel = document.getElementById('resultPanel');
+
+            document.getElementById('resultBadge').textContent = result.badge;
+            document.getElementById('resultTitle').textContent = result.title;
+            document.getElementById('resultDescription').textContent = result.description;
+            document.getElementById('resultNote').textContent = result.note;
+            resultPanel.className = `result-panel show result-${result.theme}`;
+            resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function resetMatch() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectedCount();
+            document.getElementById('resultPanel').className = 'result-panel';
+            document.getElementById('questionPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>

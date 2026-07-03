@@ -114,13 +114,13 @@ Format: JSON array
 
 ## Example Applications
 
-### 1. IT Certification Quiz (Included)
+### 1. Driver License Final Exam Quiz (Included)
 
 **Files:**
-- `prompt.md` - Defines IT quiz generation logic
+- `prompt.md` - Defines driver license final exam quiz generation logic
 - `public/quiz.html` - Quiz interface
 
-**Usage:** Generate IT certification practice questions
+**Usage:** Generate Japanese ordinary vehicle final license exam practice questions
 
 ### 2. Translation App (Example)
 
@@ -178,7 +178,7 @@ generic-webapi/
 ├── package.json       # Dependencies
 ├── .env.example       # Environment variables template
 ├── public/            # Static files
-│   ├── quiz.html     # IT quiz application
+│   ├── quiz.html     # Driver license final exam quiz application
 │   ├── style.css     # Styles
 │   └── quiz.css      # Quiz-specific styles
 └── README.md         # This file
